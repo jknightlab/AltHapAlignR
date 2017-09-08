@@ -1,31 +1,32 @@
 # AltHapAlignR
-=================
+
+* More accurate RNA-seq analysis that leverages knowledge of haplotype sequence and structure
+* An approach for utilising knowledge of alternate reference haplotypes to generate gene and haplotype level estimates of transcript abundance. 
+
+
+
 
 **Table of contents:**
 
-* [Introduction](#introduction)
 * [Installation](#installation)
 * [Usage](#usage)
 * [Contact](#contact)
 
 
 
-## Output of AltHapAlignR
+### Output of AltHapAlignR
 
 #### A graphic overview of haplotype prediction
 Synthetic heterozygote data with the PGF and COX (1:1 ratio) haplotypes in the MHC region shown for this figure.
 
-![main_figure](img/output.pdf)
+![](./img/output.png)
 
 
 Haplotype prediction and the mapping rates (left panel). These are shown for each classical HLA gene (ordered on the y-axis according to their genomic position) with respect to each of the eight known haplotypes and presented as a heat map. Numbers in each cell are mapping rates. Predicted haplotypes are highlighted with a red border. Empty cells represent genes that are not annotated in the given haplotype. Combined mapping rates from the predicted haplotypes (middle panel). Each mapping rate in the first column is the read counts of the gene in the predicted haplotype(s) divided by the total read count of the gene across all haplotypes. Mismatching mapping rates of predicted haplotypes are in the second column. Pink and grey colors are genes predicted as heterozygous and homozygous respectively. Gene counts (right panel). Bar plots show the raw read counts for each gene.  
 
 
-## Introduction
 
-
-
-## Installation
+### Installation
 
 ```R
 
@@ -45,7 +46,7 @@ devtools::install_github('jknightlab/AltHapAlignR')
 ```
 
 
-## Usage
+### Usage
 
 ```R
 library("AltHapAlignR")
@@ -53,7 +54,7 @@ library("AltHapAlignR")
 ```
 
 
-## Contact
+### Contact
 
 You are welcome to:
 
@@ -62,6 +63,6 @@ You are welcome to:
 
 
 
-## Pleases submit bugs and suggestions
+#### Pleases submit bugs and suggestions
 
 This package is still under development. If you have features you would like to have added, please submit your suggestions and bug-reports at: <https://github.com/jknightlab/AltHapAlignR/issues>
