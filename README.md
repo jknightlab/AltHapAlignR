@@ -32,7 +32,7 @@ Haplotype prediction and the mapping rates (left panel). These are shown for eac
 
 # packages to install for using AltHapAlignR :
 
-install.packages("ggplot2", "data.table", "dplyr", "plyr", "gplots", "grid", "gridExtra", "igraph", "reshape2", "doParallel", "foreach" , "sqldf")
+install.packages("ggplot2", "data.table", "dplyr", "plyr", gplots", "grid", "gridExtra", "igraph", "reshape2", "doParallel", "foreach" , "sqldf")
 
 source("https://bioconductor.org/biocLite.R")
 biocLite( c("Biostrings", "GenomicFeatures", "GenomicAlignments", "IRanges", "GenomicRanges", "Rsamtools", "rtracklayer", "") )
