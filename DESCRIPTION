@@ -1,7 +1,7 @@
 Package: AltHapAlignR
 Type: Package
 Title: AltHapAlignR: Haplotype-specific mapping in RNA-seq
-Version: 0.3
+Version: 0.35
 Date: 2017-08-27
 Authors@R: c(person("Wanseon", "Lee", role=c("aut", "cre"), email="wl@well.ox.ac.uk"),
 		person("Peter", "Humburg", role="ctb", email="humburg@well.ox.ac.uk"))
@@ -21,6 +21,7 @@ Imports:
     gridExtra,
     igraph,
     plyr,
+    dplyr
     reshape2,
     doParallel,
     foreach,
