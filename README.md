@@ -9,7 +9,7 @@
 **Table of contents:**
 
 * [Installation](#installation)
-* [Mapping sequences](#Mapping sequences)
+* [Alignment](#alignment)
 * [Usage](#usage)
 * [Performance ](#performance)
 * [Contact](#contact)
@@ -110,7 +110,7 @@ devtools::install_github('jknightlab/AltHapAlignR')
 
 
 
-## Mapping sequences
+## Alignment
 
 Any read mapper, like TopHat (Kim et al., 2013) or HISAT2 (Kim et al. 2015), can be used for this purpose, provided that information about the alignment is stored in the standard tags provided by the SAM format specification. 
 
