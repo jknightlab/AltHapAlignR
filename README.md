@@ -11,6 +11,7 @@
 * [Installation](#installation)
 * [Mapping sequences](#Mapping sequences)
 * [Usage](#usage)
+* [Performance ](#performance)
 * [Contact](#contact)
 
 
@@ -111,6 +112,8 @@ devtools::install_github('jknightlab/AltHapAlignR')
 
 ## Mapping sequences
 
+Any read mapper, like TopHat (Kim et al., 2013) or HISAT2 (Kim et al. 2015), can be used for this purpose, provided that information about the alignment is stored in the standard tags provided by the SAM format specification. 
+
 
 ### 1. Building index reference sequences
 
@@ -189,6 +192,13 @@ output <- heatmapByShortestPaths(paired_mapping_rates, gtf, hap_names= c("apd", 
 output <- heatmapByShortestPaths(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=0, sample_name="penalty0")
 
 ```
+
+
+
+#### Performance
+
+For obtaining the editing distance from multiple bam files, CPU-time is linear for the total number of reads found in the BAM files. Depending on the CPU, AltHapAlignR can parse between 30,000 and 80,000 reads per second. For over 8 BAM files comprising more than 13 million reads takes less than 3 minutes on an Intel i7-7500U CPU @ 2.70GHz (on 1 core only). The memory consumption is less than 20MB with `quicksect`, 35MB with `intervaltree`, regardless of the number of reads. It only depends on the number of genes and exons in the GTF file. For the rest of calculation, it takes less than 5 min.
+
 
 ### Contact
 
