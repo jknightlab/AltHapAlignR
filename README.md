@@ -9,7 +9,7 @@
 **Table of contents:**
 
 * [Installation](#installation)
-* [Mapping sequences](#mapping sequences to human genome references)
+* [Mapping sequences](#Mapping sequences)
 * [Usage](#usage)
 * [Contact](#contact)
 
@@ -87,15 +87,6 @@ source $ALTHAPALIGN_VENV/bin/activate
 deactivate
 ```
 
-_pybam_ is unfortunately not available in PyPI, so you will have to
-download it from their [github repository](https://github.com/JohnLonginotto/pybam).
-The script assumes that the repository is checked out alongside, but
-you can use any other location as long as it is configured in the script
-itself, cf the line
-```
-import sys
-sys.path.append('./pybam/')
-```
 
 ### Installing 'AltHapAlignR'
 
@@ -106,7 +97,7 @@ sys.path.append('./pybam/')
 install.packages("ggplot2", "data.table", "dplyr", "plyr", "gplots", "grid", "gridExtra", "igraph", "reshape2", "doParallel", "foreach" , "sqldf")
 
 source("https://bioconductor.org/biocLite.R")
-biocLite( c("Biostrings", "GenomicFeatures", "GenomicAlignments", "IRanges", "GenomicRanges", "Rsamtools", "rtracklayer", "") )
+biocLite( c("Biostrings", "GenomicFeatures", "GenomicAlignments", "IRanges", "GenomicRanges", "Rsamtools", "rtracklayer") )
 
 
 # install and load the 'devtools' package
@@ -118,7 +109,7 @@ devtools::install_github('jknightlab/AltHapAlignR')
 
 
 
-## Mapping sequences to human genome references
+## Mapping sequences
 
 
 ### 1. Building index reference sequences
@@ -157,7 +148,7 @@ library("AltHapAlignR")
 ```
 
 
-### Inputs
+#### Inputs
 
 * GTF file that covers all the haplotypes
 * BAM files (1 per region). They *must* be sorted by *query name* with
@@ -166,8 +157,39 @@ library("AltHapAlignR")
   order](https://github.com/samtools/hts-specs/issues/5).
 
 
+#### Running AltHapAlignR
 
- 
+##### 1. get editing distance from bam files
+
+```R
+gtf <- import(system.file("extdata", "gencode.v25.chr_patch_hapl_HLA.annotation.gtf", package = "AltHapAlignR"))
+bamFiles <- import(system.file("extdata", "mapping2*bam", package = "AltHapAlignR"))
+
+# without virtualenv
+EDfromBams(bamFiles, gtf, output_name="ed.txt", r="VARSL-VARS2,C6orf205-MUC21")
+
+# without virtualenv
+EDfromBams(bamFiles, gtf, output_name="ed.txt", virtualenv="path/althapalign_virtualenv", r="VARSL-VARS2,C6orf205-MUC21")
+
+```
+
+##### 2. get paired mapping rates
+
+```R
+paired_mapping_rates <- getMappingRatesFromPairs(ed_table="ed.txt", hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), read_length=50)
+```
+
+##### 3. get shortest paths
+
+```R
+# applying penalty
+output <- heatmapByShortestPaths(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=1, sample_name="penalty0")
+
+# without applying penalty
+output <- heatmapByShortestPaths(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=0, sample_name="penalty0")
+
+```
+
 ### Contact
 
 You are welcome to:
