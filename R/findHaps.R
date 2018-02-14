@@ -3,30 +3,26 @@
 
 #' To get mapping rates in all pairs of haplotypes and produce summerized figure 
 #' 
-#' @param ed_table a file name, table of editing distances generated from a function 'EDframBams'
+#' @param ed_table a file with a table of editing distances generated from a function 'EDframBams'
 #' @param hap_names haplotype names matching to column names of the input file 'ed_table' (eg. c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto") )
 #' @param read_length read length in bam files
 #' @export
 #' @import reshape2
 #' @import dplyr
+#' @importFrom dplyr first slice
+#' @importFrom utils combn read.table
 #' @examples
-#' output <- getMappingRatesFromPairs(ed_table, hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), read_length=50, anno="hg38")
-
-message(paste0("Start:", Sys.time() ) ) #Start:2018-02-12 15:56:50
-paired_mapping_rates_25 <- getMappingRatesFromPairs(ed_table="without_virtual.txt", hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), read_length=50, anno="hg38")
-message(paste0("Done:", Sys.time() ) ) #Done:2018-02-12 15:57:15
-
-
-message(paste0("Start:", Sys.time() ) ) #Start:2018-02-12 13:26:41
-paired_mapping_rates_21 <- getMappingRatesFromPairs(ed_table="without_virtual_v21_r1_1.txt", hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), read_length=50, anno="hg38")
-message(paste0("Done:", Sys.time() ) ) #Done:2018-02-12 13:26:58
-
+#' ed_table=system.file("extdata", "example_ed_table.txt", package = "AltHapAlignR")
+#' ed_table <- read.table(ed_table, sep="\t", header=TRUE)
+#' output <- getMappingRatesFromPairs(ed_table, 
+#'                hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), 
+#'                read_length=50)
 
 
 getMappingRatesFromPairs <- function(ed_table, hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"),  read_length=50){
 
-        message("Reading a file...")
-        f <- read.table(ed_table, sep="\t", header=T)
+        message("Loading a file...")
+        f <- ed_table
         colnames(f)[3:ncol(f)] <- hap_names
         f[is.na(f)] <- 100
 
@@ -200,16 +196,21 @@ getMappingRatesFromPairs <- function(ed_table, hap_names=c("apd", "cox", "dbb", 
 #' @param hap_names haplotype names matching to column names (eg. c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto") )
 #' @param penalty 1: penalty applied, 0: penalty not applied
 #' @param sample_name output file name
-#' @export rtracklayer
-#' @import igraph
-#' @import dplyr
+#' @importFrom igraph union
+#' @importFrom igraph simplify
+#' @importFrom igraph path
+#' @importFrom dplyr first slice
 #' @import ggplot2
 #' @import grid
 #' @import gridExtra
-#' @import plyr
+#' @importFrom plyr desc
 #' @importFrom data.table data.table
+#' @importFrom stats aggregate filter
+#' @export
 #' @examples
-#' output <- heatmapByShortestPaths(paired_mapping_rates, anno="hg38", penalty=1, sample_name)
+#' output <- heatmapByShortestPaths(paired_mapping_rates, gtf, 
+#'                  hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), 
+#'                  penalty=1, sample_name)
 #' # Input data: max_comb from predictRecombHapByGenes
 #' # Output data
 #' # *.shortestPath_heatmap.pdf : heatmap of selected haplotypes
@@ -218,10 +219,8 @@ getMappingRatesFromPairs <- function(ed_table, hap_names=c("apd", "cox", "dbb", 
 #' # predicted best pairs of haploytpes
 #' summary_of_best_pairs <- output$summary_of_best_pairs
 
-# gtf="./inst/extdata/gencode.v21.chr_patch_hapl_HLA.annotation.gtf"
-# gtf="./inst/extdata/gencode.v25.chr_patch_hapl_HLA.annotation.gtf"
 
-heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=1, sample_name){
+heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=1, sample_name="sample_name"){
   
       genes_from_gtf <- getGeneList(gtf, type="protein_coding")
   
@@ -378,135 +377,7 @@ heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd"
       gene_order <- gene_order[, c("gene_name", "ord2")]
       colnames(gene_order)[2] <- "ord"
       
-  #hap_names <- c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto")
-
-  # #if(anno=="hg38"){
-  #   #hap_chrs<- c("GL000250.2", "GL000251.2", "GL000252.2", "GL000253.2", "GL000254.2", "chr6", "GL000255.2", "GL000256.2")
-  #   #haps <- data.frame(hap_names, hap_chrs)
-  #
-  #   annoGenes <- read.table("./inst/extdata/annoGenes_ordered.txt", sep="\t", header=T)
-  #
-  #   annoGenes$gene_from <- gsub("VARSL", "VARS2", as.character(annoGenes$gene_from) )
-  #   annoGenes$gene_to <- gsub("VARSL", "VARS2", as.character(annoGenes$gene_to) )
-  #   annoGenes$gene_to <- gsub("C6orf205", "MUC21", as.character(annoGenes$gene_to) )
-  #   annoGenes$gene_to <- gsub("C6orf205", "MUC21", as.character(annoGenes$gene_to) )
-  #   annoGenes <- subset(annoGenes, as.character(gene_from)!="TRIM39-RPP21_pgf" & as.character(gene_to)!="TRIM39-RPP21_pgf" )
-  #
-  # #}
-
-
-
-
-  #       ########### bu start
-  #
-  # z <- annoGenes[ (gsub( "(.*)_.*", "\\1", as.character(annoGenes$gene_from) ) %in% as.character(rownames(input_structure)) ) | (gsub( "(.*)_.*", "\\1", as.character(annoGenes$gene_to) ) %in% as.character(rownames(input_structure)) ),]
-  # #z <- annoGenes
-  # z$gene_from <- gsub("(.*)_.*", "\\1", z$gene_from)
-  # z$gene_to <- gsub("(.*)_.*", "\\1", z$gene_to)
-  # # write.table(z, "gene_path_structure.txt", sep="\t", quote=F, row.names=F)
-  #
-  # getMissingGenes <- unique(z[,c("gene_from", "hap_from")] )
-  # getMissingGenes <- data.frame(table(getMissingGenes$gene_from))
-  # getMissingGenes <- subset( getMissingGenes, Freq>0 & Freq<length(hap_names) )
-  #
-  #
-  #
-  #
-  # #########################################################
-  # ###
-  # ### get ordered genes in the MHC region
-  # ###
-  # #########################################################
-  #
-  #
-  #
-  # ordered_genes <- c()
-  # for(i in unique(as.character(z$hap_from)) ){
-  #   hn <- subset(z, as.character(hap_from)==i & as.character(hap_to)==i)
-  #   if(nrow(hn) >0 ){
-  #
-  #     hn <- rbind( data.frame(gene_name=as.character(hn$gene_from), ord_bu=as.numeric(hn$ord_from) ),
-  #                  data.frame(gene_name=as.character(hn$gene_to), ord_bu=as.numeric(hn$ord_to))  )
-  #     hn <- hn[!is.na(hn$gene_name),]
-  #     hn <- unique(hn)
-  #     hn <- hn[order(as.numeric(hn$ord_bu)),]
-  #     hn$ord <- c(1:nrow(hn))
-  #
-  #     a0 <- as.character(subset(hn, ord==min(ord) )$gene_name )
-  #     ordered_genes <- rbind(ordered_genes,
-  #                            data.frame(gene_from="Start", gene_to=a0, hap_from="Start", hap_to=i, ord_from=0, ord_to=1) )
-  #
-  #     for(i2 in 1: (length(hn$ord)-1) ){
-  #       g1=hn$ord[i2]
-  #       g2=hn$ord[i2+1]
-  #
-  #       a1 <- as.character(subset(hn, ord==g1 )$gene_name )
-  #       a2 <- as.character(subset(hn, ord==g2 )$gene_name )
-  #       tmp <- data.frame(gene_from=a1, gene_to=a2, hap_from=i, hap_to=i, ord_from=g1, ord_to=g2)
-  #       tmp <- unique(tmp)
-  #       tmp <- subset(tmp, as.character(gene_from)!=as.character(gene_to) )
-  #       #print(tmp)
-  #       ordered_genes <- rbind(ordered_genes, tmp)
-  #     }
-  #
-  #     a3 <- as.character(subset(hn, ord==max(hn$ord) )$gene_name )
-  #     ordered_genes <- rbind(ordered_genes,
-  #                            data.frame(gene_from=a3, gene_to="End", hap_from=i, hap_to="End",
-  #                                       ord_from=max(hn$ord), ord_to=(max(hn$ord) +1)) )
-  #   }
-  # }
-  # #ordered_genes <- subset(ordered_genes, gene_to!="End")
-  #
-  #
-  #
-  #
-  # num_genes_in_haps <- aggregate(ord_from ~ hap_from, data = ordered_genes, max)
-  # h1 <- as.character(num_genes_in_haps[which(num_genes_in_haps$ord_from==max(num_genes_in_haps$ord_from) ),]$hap_from)
-  # h2 <- as.character (hap_names [!(hap_names %in% c("apd", h1) )] )
-  #
-  #
-  # gene_order <- subset(ordered_genes, hap_from==h1)
-  # gene_order <- data.frame(gene_from=gene_order$gene_from, ord_from=gene_order$ord_from)
-  # for(i in h2){
-  #
-  #   tmp <- subset(ordered_genes, hap_from==i)
-  #   tmp <- tmp[ !( tmp$gene_from %in% gene_order$gene_from), ]
-  #
-  #   if(nrow(tmp) >0){
-  #
-  #     for( missing_g in 1:nrow(tmp) ){
-  #       #print(missing_g)
-  #       #print( as.character( tmp$gene_from[missing_g] ) )
-  #
-  #       ord= gene_order[grep(as.character(tmp$gene_to[missing_g]), gene_order$gene_from),]$ord_from
-  #       if(length(ord) ==0){
-  #         #print( as.character( tmp$gene_from[missing_g] ) )
-  #       }
-  #       if(length(ord) ==1){
-  #         gene_order[which(gene_order$ord_from>=ord),]$ord_from <- as.numeric( gene_order[which(gene_order$ord_from>=ord),]$ord_from +1 )
-  #         gene_order <- rbind(gene_order,
-  #                             data.frame(gene_from=as.character( tmp$gene_from[missing_g] ),
-  #                                        ord_from=ord) )
-  #         gene_order <- gene_order[order(gene_order$ord_from),]
-  #       }
-  #
-  #     }
-  #   }
-  # }
-  #
-  # gene_order <- gene_order[gene_order$gene_from %in% rownames(input_structure), ]
-  # colnames(gene_order) <- c("gene_from", "ord_tmp")
-  # gene_order$ord_from=c(1:nrow(gene_order))
-  #
-  # gene_order=aggregate(ord_from ~ gene_from, data = gene_order, max)
-  # gene_order <- gene_order[order(gene_order$ord_from),]
-  # gene_order$ord=c(1:nrow(gene_order))
-  #
-  #
-  #
-  # ########### bu end
-  
-  
+ 
   
   
   #################################################################
@@ -581,7 +452,7 @@ heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd"
   message("Making path structure...")
   path_frame <- c()
   for(ord in 1:(nrow(mr)-1) ){
-    message(paste0(ord, ": ", mr[ord, c("gene_name")]) )
+    #message(paste0(ord, ": ", mr[ord, c("gene_name")]) )
     
     g1 <- as.character(mr[ord, c("gene_name")])
     g2 <- as.character(mr[(ord+1), c("gene_name")])
@@ -759,6 +630,7 @@ heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd"
   
   
   # 1) from start to end
+  message("Constructing the shortest path...")
   g <- graph.data.frame(cbind(as.character(path_frame2$gene_from2), as.character(path_frame2$gene_to2) ), vertices=node_info, directed=TRUE)
   
   E(g)$weight <- as.numeric(path_frame2$weight)
@@ -822,16 +694,20 @@ heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd"
   #dat <- merge(dat, z2, by="gene_hap", all=TRUE)
   dat <- merge(dat, z2, by="gene_hap", all=TRUE)
   dat$best_pair[is.na(dat$best_pair)] <- 0
-  #dat <- dat[,c("gene_hap", "gene_from", "hap_from", "best_pair")]
+  dat$gene_name.y <- gsub("(.*)_(.*)", "\\1", dat$gene_hap)
+  dat$hap_n <- gsub("(.*)_(.*)", "\\2", dat$gene_hap)
+  
   dat <- dat[,c("gene_hap", "gene_name.y", "hap_n", "best_pair")]
   colnames(dat) <- c("gene_hap", "gene_name", "hap_from", "best_pair")
+  dat$hap_from <- toupper(dat$hap_from)
+  dat$gene_hap <- toupper(dat$gene_hap)
   
   
   dat <- merge(dat, gene_order, by="gene_name", all=TRUE)
   colnames(dat) <- c("gene_name", "gene_hap", "hap", "best_pair", "ord")
+  
   dat <- dat[!is.na(dat$ord), ]
   dat <- dat[order(dat$ord), ]
-  dat$gene_hap <- toupper(dat$gene_hap)
   
   mapping_rates <- paired_mapping_rates
   tmp1 <- aggregate(rate_of_gene_count ~ gene_name, data = mapping_rates, max)
@@ -1055,11 +931,9 @@ heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd"
   
   
   # testing
-  test <- data.frame(table(paste0(selected_genes_by_top1path$Hap1, "_", selected_genes_by_top1path$Hap2)) )
-  print(test)
-  #write.table(test, paste0(sample_name, ".stats.tmp.txt"), quote=F)
-  
-  height_length= length(unique(dat_final$gene_name) ) * 0.25
+  #test <- data.frame(table(paste0(selected_genes_by_top1path$Hap1, "_", selected_genes_by_top1path$Hap2)) )
+
+  height_length= length(unique(dat_final$gene_name) ) * 0.26
   
   ggsave(filename=paste0(sample_name, ".shortestPath_heatmap.pdf" ), g_p123, width=18, height=height_length)
   
@@ -1070,42 +944,3 @@ heatmapByShortestPaths <- function(paired_mapping_rates, gtf, hap_names= c("apd"
   
 }
 
-
-
-
-
-    # reads_in_a_gene <- subset(f, gene_name=="HLA-A")
-    # total_number_of_reads_in_a_gene <- nrow(reads_in_a_gene)
-    # total_number_of_reads_in_a_gene
-    # 
-    # 
-    # 
-    # #min_ed <- apply(reads_in_a_gene, 1, function(x) { min(x[3:length(x)]) } )
-    # #reads_in_a_gene$min_ed <- as.numeric(min_ed)
-    # 
-    # #reads_in_a_gene <- head(reads_in_a_gene)
-    # a <- melt(reads_in_a_gene, id.vars = c("read_name", "gene_name") )
-    # a$value[is.na(a$value)] <- 100
-    # a <- group_by(a, as.character(read_name) )
-    # a <- filter(a, value==min(value))
-    # a <- data.frame(a)
-    # a <- a[,1:4]
-    # 
-    # reads_in_a_gene <- dcast(a, read_name ~ variable, value.var = "value")
-    # reads_in_a_gene[is.na(reads_in_a_gene)] <- read_length
-    # 
-    # 
-    # 
-    # 
-    # paired_haps <-reads_in_a_gene[, c(1,2,3)]
-    # paired_haps <- paired_haps[paired_haps[,2]!=100 | paired_haps[,3]!=100 ,]
-    # total_number_of_reads <- nrow(paired_haps)
-    # total_number_of_reads
-    # 
-    # only_hap1 <- subset(paired_haps, paired_haps[,2] < paired_haps[,3])
-    # only_hap2 <- subset(paired_haps, paired_haps[,2] > paired_haps[,3])
-    # both_haps <- subset(paired_haps, paired_haps[,2]==paired_haps[,3])
-    # dim(only_hap1)
-    # dim(only_hap2)
-    # dim(both_haps)
-    
