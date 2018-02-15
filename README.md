@@ -194,6 +194,7 @@ paired_mapping_rates <- getMappingRatesFromPairs(ed_table, hap_names=c("apd", "c
 
 ```R
 
+gtf <- system.file("extdata", "gencode.v21.chr_patch_hapl_HLA.annotation.gtf", package = "AltHapAlignR")
 paired_mapping_rates=system.file("extdata", "example_paired_mapping_rates.txt", package = "AltHapAlignR")
 paired_mapping_rates <- read.table(paired_mapping_rates, sep="\t", header=TRUE)
 
