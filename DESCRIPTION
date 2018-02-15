@@ -1,36 +1,26 @@
 Package: AltHapAlignR
 Type: Package
 Title: AltHapAlignR: Haplotype-specific mapping in RNA-seq
-Version: 0.35
+Version: 0.5
 Date: 2017-08-27
 Authors@R: c(person("Wanseon", "Lee", role=c("aut", "cre"), email="wl@well.ox.ac.uk"),
 		person("Peter", "Humburg", role="ctb", email="humburg@well.ox.ac.uk"))
 Description: Comparing reads mapped to multiple haplotype references and improved accuracy for RNA-seq analyses .
 License: GPL (>=2)
 Imports: 
-	IRanges,
-    Biostrings,
-    GenomicAlignments,
-    GenomicFeatures,
-    GenomicRanges,
-    Rsamtools,
-    data.table,
     dplyr,
-    gplots,
+    data.table,
     grid,
     gridExtra,
     igraph,
     plyr,
-    dplyr
+    dplyr,
     reshape2,
-    doParallel,
     foreach,
     rtracklayer,
-    sqldf,
     ggplot2
 Suggests: 
     knitr,
-    HapTagAnno.hg38,
     testthat,
     pander,
     rmarkdown
