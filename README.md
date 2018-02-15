@@ -89,16 +89,17 @@ deactivate
 ```
 
 
+
 ### Installing 'AltHapAlignR'
 
 ```R
 
 # packages to install for using AltHapAlignR :
 
-install.packages("ggplot2", "data.table", "dplyr", "plyr", "gplots", "grid", "gridExtra", "igraph", "reshape2", "doParallel", "foreach" , "sqldf")
+install.packages("igraph", "ggplot2", "data.table", "dplyr", "plyr", "grid", "gridExtra", "igraph", "reshape2", "foreach")
 
 source("https://bioconductor.org/biocLite.R")
-biocLite( c("Biostrings", "GenomicFeatures", "GenomicAlignments", "IRanges", "GenomicRanges", "Rsamtools", "rtracklayer") )
+biocLite( c("rtracklayer") )
 
 
 # install and load the 'devtools' package
@@ -117,7 +118,7 @@ Any read mapper, like TopHat (Kim et al., 2013) or HISAT2 (Kim et al. 2015), can
 
 ### 1. Building index reference sequences
 
-Depending on mapper, indexing comments are different. This is an example of indexing sequences using bowtie2. 
+Depending on mapper, indexing comments are different. These are examples of indexing reference sequences using bowtie2. 
 
 
 ####  building indexes of genome sequence (PGF haplotype)
@@ -178,18 +179,23 @@ EDfromBams(bamFiles, gtf, output_name="ed.txt", virtualenv="path/althapalign_vir
 
 ##### 2. get paired mapping rates
 
+Haplotype names of the MHC in the parameter 'hap_names' shoud be in the same order of column names found in the output from 'EDfromBams'.
+
 ```R
-paired_mapping_rates <- getMappingRatesFromPairs(ed_table="ed.txt", hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), read_length=50)
+ed_table=system.file("extdata", "example_ed_table.txt", package = "AltHapAlignR")
+ed_table <- read.table(ed_table, sep="\t", header=TRUE)
+
+paired_mapping_rates <- getMappingRatesFromPairs(ed_table, hap_names=c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), read_length=50)
 ```
 
 ##### 3. get shortest paths
 
 ```R
-# applying penalty
-output <- heatmapByShortestPaths(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=1, sample_name="penalty0")
 
-# without applying penalty
-output <- heatmapByShortestPaths(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=0, sample_name="penalty0")
+paired_mapping_rates=system.file("extdata", "example_paired_mapping_rates.txt", package = "AltHapAlignR")
+paired_mapping_rates <- read.table(paired_mapping_rates, sep="\t", header=TRUE)
+
+output <- heatmapByShortestPaths(paired_mapping_rates, gtf, hap_names= c("apd", "cox", "dbb", "mann", "mcf", "pgf", "qbl", "ssto"), penalty=1, sample_name="p1")
 
 ```
 
