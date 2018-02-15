@@ -166,8 +166,10 @@ library("AltHapAlignR")
 ##### 1. get editing distance from bam files
 
 ```R
-gtf <- import(system.file("extdata", "gencode.v25.chr_patch_hapl_HLA.annotation.gtf", package = "AltHapAlignR"))
-bamFiles <- import(system.file("extdata", "mapping2*bam", package = "AltHapAlignR"))
+gtf <- system.file("extdata", "gencode.v21.chr_patch_hapl_HLA.annotation.gtf", package = "AltHapAlignR")
+bamDir = system.file("extdata",  package="AltHapAlignR")
+bamFiles = list.files(bamDir, pattern="^mapping.*bam$", full=TRUE)
+
 
 # without virtualenv
 EDfromBams(bamFiles, gtf, output_name="ed.txt", r="VARSL-VARS2,C6orf205-MUC21")
