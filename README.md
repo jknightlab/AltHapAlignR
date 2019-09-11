@@ -36,17 +36,10 @@ Before installing 'AltHapAlignR', we need to set up python environment.
 
 * [pybam](https://github.com/JohnLonginotto/pybam): "Pure Python" -but
   fast- library to read BAM files. 
+```
+pip install https://github.com/JohnLonginotto/pybam/zipball/master
+```
 
-
-```
-pip install https://github.com/muffato/pybam/zipball/master
-```
-or
-```
-git clone https://github.com/JohnLonginotto/pybam    # Not available in PyPI
-export PYTHONPATH=where_pybam_is${PYTHONPATH:+:$PYTHONPATH}
-
-```
 * [intervaltree](https://pypi.python.org/pypi/intervaltree): "Pure Python"
   library that implements [interval trees](https://en.wikipedia.org/wiki/Interval_tree)
 ```
